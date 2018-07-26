@@ -26,7 +26,9 @@ def get_data():
 			text = literal_eval(row)
 			samples+=text['postText']
 
-	print("Gathered {} sample texts".format(len(samples)))		
+	print("Gathered {} sample texts".format(len(samples)))	
+
+	return samples, labels	
 
 if __name__ == '__main__':
 
