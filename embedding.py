@@ -32,9 +32,9 @@ def preprocess():
 	return sequences, annotations, word_index
 
 
-def get_embedding(word_dimension, embedding='glove840'):
+def get_embedding(embedding='glove840'):
 
-	embedding_matrix = np.zeros(shape=(len(word_index)+1, word_dimension), dtype='float32')
+	embedding_matrix = np.random.random((len(word_index)+1, 300))
 
 	word_index = preprocess()[-1]
 
@@ -49,6 +49,27 @@ def get_embedding(word_dimension, embedding='glove840'):
 		vocab_model = KeyedVectors.load_word2vec_format('glove_42B_300d.txt', binary = False)
 	else:
 		vocab_model = KeyedVectors.load_word2vec_format('mikolov_word2vec.bin', binary=True)
+
+
+	'''
+
+	This sets the embedding matrix with word vectors of the words present in
+	the original vocab model. If a particular word present in our dataset is 
+	a OOV word for the original vocab model then it is initialized to zero vector .
+
+	'''
+
+	for word, i in word_index.items():
+
+		if word in vocab_model.vocab:
+			
+			embedding_matrix[i] = vocab_model[word] 
+
+
+	return embedding_matrix
+
+
+			
 
 
 
