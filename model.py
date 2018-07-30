@@ -1,5 +1,5 @@
 import keras
-from keras.layers import Embedding, Dense, Input, Reshape, GRU, Bidirectional,  Dropout
+from keras.layers import Embedding, Dense, Input, GRU, Bidirectional,  Dropout
 from keras.models import Model 
 from embedding import preprocess, get_embedding
 from keras.optimizers import RMSprop
@@ -13,10 +13,13 @@ def clickbait_model(maxlen, embedding_type):
 
 	input_layer = Input(shape=(maxlen, ), name='input_layer')
 
-	embedding = Embedding(input_dim=vocabulary, output_dim=300, input_length=maxlen,name='embedding_layer')(input)
-	
-	reshape_for_gru = Reshape(target_shape=(maxlen,  300))(embedding)
+	input_drop = Dropout(0.2)(input_layer)
 
+	embedding = Embedding(input_dim=vocabulary, output_dim=300, input_length=maxlen,name='embedding_layer')(input_drop)
+
+	embedding_drop = Dropout(0.2)(embedding)
+	
+	
 	'''
 	
 	This is the GRU layer that will be used for capturing the sequential dependencies
@@ -35,13 +38,15 @@ def clickbait_model(maxlen, embedding_type):
 
 	'''
 
-	bidirectional = Bidirectional(my_gru, merge_mode='concat')(reshape_for_gru)
+	bidirectional = Bidirectional(my_gru, merge_mode='concat')(embedding_drop)
 
-	output = Dense(1, activation='sigmoid', name='output_layer')(bidirectional)
+	bidirectional_drop = Dropout(0.5)(bidirectional)
+
+	output = Dense(1, activation='sigmoid', name='output_layer')(bidirectional_drop)
 
 	model = Model(inputs=input_layer, outputs=output)
 
-	model.compile(optimizer, loss='binary_crossentropy',  metrics=['accuracy'])
+	model.compile(optimizer, loss='binary_crossentropy',  metrics=['accuracy','mse'])
 
 	return model
 
