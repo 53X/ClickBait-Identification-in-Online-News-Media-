@@ -6,16 +6,26 @@ from keras.optimizers import RMSprop
 
 
 
-vocabulary = len(preprocess[-1]) + 1
+vocabulary = len(preprocess()[-1]) + 1
 optimizer = RMSprop()
 
-def clickbait_model(maxlen, embedding_type):
+def clickbait_model(maxlen=200, embedding_type='glove840'):
 
 	input_layer = Input(shape=(maxlen, ), name='input_layer')
 
 	input_drop = Dropout(0.2)(input_layer)
 
+	'''
+	Dropout for the embedding layer
+
+	'''
+
 	embedding = Embedding(input_dim=vocabulary, output_dim=300, input_length=maxlen,name='embedding_layer')(input_drop)
+
+	'''
+	Dropout for the input of the Bidirectional GRU
+
+	''' 
 
 	embedding_drop = Dropout(0.2)(embedding)
 	
@@ -40,6 +50,11 @@ def clickbait_model(maxlen, embedding_type):
 
 	bidirectional = Bidirectional(my_gru, merge_mode='concat')(embedding_drop)
 
+	'''
+	Dropout for the output of the Bidirectional GRU 
+
+	'''
+	
 	bidirectional_drop = Dropout(0.5)(bidirectional)
 
 	output = Dense(1, activation='sigmoid', name='output_layer')(bidirectional_drop)
@@ -48,9 +63,17 @@ def clickbait_model(maxlen, embedding_type):
 
 	model.compile(optimizer, loss='binary_crossentropy',  metrics=['accuracy','mse'])
 
+	print("Model Ready for Deployment:")
+
+	print(model.summary())
+
 	return model
 
 
+
+if __name__ =='__main__':
+
+	clickbait_model()
 
 
 
